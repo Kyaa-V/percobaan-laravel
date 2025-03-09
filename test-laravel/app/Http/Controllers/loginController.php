@@ -17,11 +17,14 @@ class loginController extends Controller
             'password' => 'required',
         ]);
         $user = User::where('email',$request->email)->first();
-        if(! $user || Hash::check($request->password,$user->password)){
+        if(! $user || ! Hash::check($request->password,$user->password)){
             throw ValidationException::withMessages([
                 'email' => ['Email atau Password salah'],
             ]);
         }
-        return $user->createToken('password incoret')->plainTextToken;
+        $token = $user->createToken('password incoret')->plainTextToken;
+        return response()->json([
+            "token" => $token
+        ]);
     }
 }
