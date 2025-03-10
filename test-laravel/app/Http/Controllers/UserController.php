@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Hash;
 
 class UserController
 {
@@ -15,7 +16,7 @@ class UserController
         $user = User::all();
         return $user->toJson();
     }
-
+    
     public function getById($id)
     {
         $user = User::find($id);
@@ -23,6 +24,22 @@ class UserController
             return response()->json(["message"=> "user tidak ditemukan"],404);
         }
         return $user->toJson();
+    }
+    
+    public function sigin(Request $request)
+    {
+        $request->validate([
+            'email' => 'required|email|unique:users,email',
+            'name'=> 'required',
+            'password' => 'required',
+        ]);
+
+        $user = User::create([
+            'name' => $request->name,
+            'email' => $request->email,
+            'password' => Hash::make($request->password),
+        ]);
+        return response()->json($user,201);
     }
 
     /**
