@@ -1,6 +1,5 @@
-    <?php
-
-    namespace App\Models;
+<?php
+namespace App\Models;
 
     // use Illuminate\Contracts\Auth\MustVerifyEmail;
     use App\Models\Role;
@@ -21,13 +20,14 @@
         /**
          * The attributes that are mass assignable.
          *
-         * @var list<string>
+         * @var list<stfor (let i = 0; i < 5; i++) {
          */
         protected $fillable = [
             'id',
             'name',
             'email',
             'password',
+            'role_name'
         ];
 
         /**

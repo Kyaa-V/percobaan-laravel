@@ -31,9 +31,9 @@ class UserController
 
     public function get()
     {
-        $user = User::with('role_id')->get();
+        $user = User::with('role')->get();
         return response()->json(["data"=>[
-            "user"=>$user
+            "user"=> UserResource::collection($user)
         ]],201);
     }
     public function deleteUser($id)
