@@ -12,10 +12,35 @@ class UserController
     /**
      * Display a listing of the resource.
      */
+
+     public function updateUser(Request $request, $id){
+
+        $request->validate([
+            'password' => 'required|min:6',
+        ]);
+
+        $user = User::find($id);
+        $user->update([
+            "password" => Hash::make($request->password),
+        ]);
+
+        return response()->json([
+            "user" => new UserResource($user)
+        ]);
+     }
+
     public function get()
     {
-        $user = User::all();
-        return $user->toJson();
+        $user = User::with('role_id')->get();
+        return response()->json(["data"=>[
+            "user"=>$user
+        ]],201);
+    }
+    public function deleteUser($id)
+    {
+        $user = User::find(1);
+        $user->delete();
+        return response()->json(["messsagge"=> "Berhasil menghapus User"],201);
     }
     
     public function getById($id)
@@ -24,7 +49,9 @@ class UserController
         if(!$user){
             return response()->json(["message"=> "user tidak ditemukan"],404);
         }
-        return $user->toJson();
+        return response()->json(["data"=>[
+            "user"=>new UserResource($user),
+        ]],201);
     }
     
     public function sigin(Request $request)
