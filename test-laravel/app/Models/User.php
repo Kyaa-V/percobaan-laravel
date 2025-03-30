@@ -43,6 +43,12 @@ namespace App\Models;
         public function role(){
             return $this->belongsTo(Role::class,'role_id');
         }
+        public function comments(){
+            return $this->hasMany(Comment::class,'author_id');
+        }
+        public function authorComments(){
+            return $this->hasMany(Comment::class,'users_id');
+        }
 
 
 
