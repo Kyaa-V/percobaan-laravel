@@ -15,12 +15,15 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->string('name');
             $table->string('email')->unique();
+            $table->string('password')->nullable();
+            $table->string('providers_id')->nullable();
+            $table->string('providers')->nullable();
+            $table->string('providers_tokens')->nullable();
+            $table->string('providers_refresh_tokens')->nullable();
             $table->timestamp('email_verified_at')->nullable();
-            $table->string('password');
             $table->timestamp('banned_until')->nullable();
             $table->timestamps();
-            $table->unsignedBigInteger('role_id')->default(1);
-            $table->foreign('role_id')->references('id')->on('roles')->onDelete('cascade');
+            $table->foreignId('role_id')->default(1)->constrained('roles')->cascadeOnDelete();
         });
     }
 
@@ -30,9 +33,9 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('users', function (Blueprint $table) {
-            $table->dropForeign(['role_id']); 
+            $table->dropForeign(['role_id']);
         });
-        
+
         Schema::dropIfExists('users');
     }
 };

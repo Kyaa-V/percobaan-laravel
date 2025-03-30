@@ -45,6 +45,7 @@ namespace App\Models;
         }
 
 
+
         /**
          * Get the attributes that should be cast.
          *
