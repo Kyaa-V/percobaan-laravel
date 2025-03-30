@@ -2,64 +2,151 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Resources\UserResource;
-use App\Http\Resources\UserResourceCollection;
 use App\Models\User;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
+use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Resources\UserResourceCollection;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
-class UserController
+class UserController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
 
     public function updateUser(Request $request, $id)
     {
+        try {
+            $validatedData = $request->validate([
+                'password' => 'required|min:6|max:100',
+            ]);
 
-        $request->validate([
-            'password' => 'required|min:6',
-        ]);
+            $user = User::findOrFail($id);
+            
+            $user->update([
+                "password" => Hash::make($validatedData['password']),
+            ]);
 
-        $user = User::find($id);
-        $user->update([
-            "password" => Hash::make($request->password),
-        ]);
+            return response()->json([
+                "success" => true,
+                "message" => "Password berhasil diupdate",
+                "data" => new UserResource($user)
+            ]);
 
-        return response()->json([
-            "user" => new UserResource($user)
-        ]);
+        } catch (ValidationException $e) {
+            return response()->json([
+                "success" => false,
+                "message" => "Validasi gagal",
+                "errors" => $e->errors()
+            ], 422);
+
+        } catch (NotFoundHttpException $e) {
+            return response()->json([
+                "success" => false,
+                "message" => "User tidak ditemukan"
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Update user error: ' . $e->getMessage(), [
+                'user_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan saat mengupdate user"
+            ], 500);
+        }
     }
 
     public function get()
     {
-        $user = User::with('role')->get();
-        return response()->json(["data"=>[
-            "message"=>"Berhasil get data user",
-            "status_code"=>201,
-            "user"=> UserResourceCollection::collection($user),
-        ]],
-            201
-        );
-    }
-    public function deleteUser($id)
-    {
-        $user = User::find(1);
-        $user->delete();
-        return response()->json(["messsagge" => "Berhasil menghapus User"], 201);
+        try {
+            $users = User::with('role')->get();
+
+            return response()->json([
+                "success" => true,
+                "data" => [
+                    "message" => "Berhasil get data user",
+                    "users" => new UserResourceCollection($users)
+                ]
+            ]);
+
+        } catch (\Exception $e) {
+            Log::error('Get users error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan saat mengambil data user"
+            ], 500);
+        }
     }
 
+    /**
+     * Delete user
+     */
+    public function deleteUser($id)
+    {
+        try {
+            $user = User::findOrFail($id);
+            $user->delete();
+
+            return response()->json([
+                "success" => true,
+                "message" => "Berhasil menghapus user"
+            ]);
+
+        } catch (NotFoundHttpException $e) {
+            return response()->json([
+                "success" => false,
+                "message" => "User tidak ditemukan"
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Delete user error: ' . $e->getMessage(), [
+                'user_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan saat menghapus user"
+            ], 500);
+        }
+    }
+
+    /**
+     * Get user by ID
+     */
     public function getById($id)
     {
-        $user = User::find($id);
-        if (!$user) {
-            return response()->json(["message" => "user tidak ditemukan"], 404);
+        try {
+            $user = User::findOrFail($id);
+
+            return response()->json([
+                "success" => true,
+                "data" => new UserResource($user, "User dengan nama: {$user->name} ditemukan")
+            ]);
+
+        } catch (NotFoundHttpException $e) {
+            return response()->json([
+                "success" => false,
+                "message" => "User tidak ditemukan"
+            ], 404);
+
+        } catch (\Exception $e) {
+            Log::error('Get user by ID error: ' . $e->getMessage(), [
+                'user_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan saat mengambil data user"
+            ], 500);
         }
-        return response()->json([
-            "data" => new UserResource($user, "User dengan nama: $user->name ditemukan", 200)
-        ], 200);
     }
-    /**
-     * Store a newly created resource in storage.
-     */
 }

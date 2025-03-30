@@ -2,9 +2,150 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Comment;
 use Illuminate\Http\Request;
+use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Validation\ValidationException;
+use Illuminate\Auth\Access\AuthorizationException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 
-class CommentController
+class CommentController extends Controller
 {
-    //
+
+    public function getCommentsByAuthor($authorId)
+    {
+        try {
+            $comments = Comment::with('author')
+                ->where('authors_id', $authorId)
+                ->orderBy('created_at', 'desc')
+                ->get();
+
+            return response()->json([
+                'success' => true,
+                'data' => $comments
+            ]);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal mengambil data komentar'
+            ], 500);
+        }
+    }
+    public function postComment(Request $request)
+    {
+        try {
+            $validatedData = $request->validate([
+                'content' => 'required|string|max:1000',
+                'author_id' => 'required|integer|exists:users,id',
+                'users_id' => 'nullable|integer|exists:users,id',
+                'parent_id' => 'nullable|integer|exists:comments,id'
+            ]);
+
+            $comment = Comment::create($validatedData);
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Berhasil Post Comment',
+                'data' => $comment,
+                'status_code' => 200
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors(),
+                'status_code' => 422
+            ], 422);
+        } catch (\Exception $e) {
+            Log::error('Gagal memposting komentar: ' . $e->getMessage());
+
+            return response()->json([
+                'success' => false,
+                'message' => 'Gagal memposting komentar',
+                'error' => $e->getMessage(),
+                'status_code' => 500
+            ], 500);
+        }
+    }
+
+    public function deleteCommentById($id)
+    {
+        try {
+            $comment = Comment::findOrFail($id);
+
+            $this->authorize('delete', $comment);
+
+            $comment->delete();
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'message' => 'Komentar berhasil dihapus'
+                ]
+            ], 200);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Komentar tidak ditemukan'
+            ], 404);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk menghapus komentar ini'
+            ], 403);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat menghapus komentar',
+                'error' => env('APP_DEBUG') ? $th->getMessage() : null
+            ], 500);
+        }
+    }
+
+    public function editCommentById(Request $request, $id)
+    {
+        try {
+            $validated = $request->validate([
+                'content' => 'required|string|max:1000',
+            ]);
+
+            $comment = Comment::findOrFail($id);
+            $this->authorize('update', $comment);
+
+            $comment->update([
+                'content' => $validated['content'],
+            ]);
+
+            return response()->json([
+                'success' => true,
+                'data' => [
+                    'message' => 'Komentar berhasil diperbarui',
+                    'comment' => $comment
+                ]
+            ], 200);
+        } catch (ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Validasi gagal',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (ModelNotFoundException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Komentar tidak ditemukan'
+            ], 404);
+        } catch (AuthorizationException $e) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Anda tidak memiliki izin untuk mengedit komentar ini'
+            ], 403);
+        } catch (\Throwable $th) {
+            return response()->json([
+                'success' => false,
+                'message' => 'Terjadi kesalahan saat memperbarui komentar',
+                'error' => env('APP_DEBUG') ? $th->getMessage() : null
+            ], 500);
+        }
+    }
 }
