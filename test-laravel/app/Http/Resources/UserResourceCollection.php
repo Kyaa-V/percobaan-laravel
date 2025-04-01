@@ -2,25 +2,28 @@
 
 namespace App\Http\Resources;
 
-use Illuminate\Http\Request;
-use Illuminate\Http\Resources\Json\JsonResource;
+use Illuminate\Http\Resources\Json\ResourceCollection;
 
-class UserResourceCollection extends JsonResource
+class UserResourceCollection extends ResourceCollection
 {
-    /**
-     * Transform the resource collection into an array.
-     *
-     * @return array<int|string, mixed>
-     */
-    public function toArray(Request $request): array
+    public function toArray($request)
     {
         return [
-            "id" => $this->id,
-            "name" => $this->name,
-            "email" => $this->email,
-            "role" => $this->whenLoaded('role', fn() => $this->role->role_name, "USER"),
-            "created_at" => $this->created_at,
-            "updated_at" => $this->updated_at,
+            'data' => $this->collection->transform(function ($user) {
+                return [
+                    'id' => $user->id,
+                    'name' => $user->name,
+                    'email' => $user->email,
+                    'role' => $user->role->role_name ?? "USER",
+                    'created_at' => $user->created_at->format('Y-m-d H:i:s'),
+                    'updated_at' => $user->updated_at->format('Y-m-d H:i:s')
+                ];
+            }),
+            'meta' => [
+                'current_page' => $this->currentPage(),
+                'total' => $this->total(),
+                'per_page' => $this->perPage()
+            ]
         ];
     }
 }

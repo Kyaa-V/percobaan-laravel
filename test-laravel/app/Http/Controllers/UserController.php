@@ -63,10 +63,11 @@ class UserController extends Controller
     public function get()
     {
         try {
-            $users = User::with('role')->get();
+            $users = User::with('role')->paginate(15);
 
             return response()->json([
                 "success" => true,
+                "amount_users" => $users->total(),
                 "data" => [
                     "message" => "Berhasil get data user",
                     "users" => new UserResourceCollection($users)
@@ -80,7 +81,8 @@ class UserController extends Controller
 
             return response()->json([
                 "success" => false,
-                "message" => "Terjadi kesalahan saat mengambil data user"
+                "message" => "Terjadi kesalahan saat mengambil data user",
+                "error" => $e->getMessage()
             ], 500);
         }
     }

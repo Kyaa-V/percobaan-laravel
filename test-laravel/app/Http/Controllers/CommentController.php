@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Resources\CommentResource;
 use App\Models\Comment;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
@@ -16,14 +17,15 @@ class CommentController extends Controller
     public function getCommentsByAuthor($authorId)
     {
         try {
-            $comments = Comment::with('author')
+            $comments = Comment::with(['author', 'replies.author'])
                 ->where('authors_id', $authorId)
+                ->whereNull('parent_id')
                 ->orderBy('created_at', 'desc')
                 ->get();
 
             return response()->json([
                 'success' => true,
-                'data' => $comments
+                'data' => new CommentResource($comments)
             ]);
         } catch (\Throwable $th) {
             return response()->json([
@@ -35,18 +37,23 @@ class CommentController extends Controller
     public function postComment(Request $request)
     {
         try {
-            $validatedData = $request->validate([
+            $request->validate([
                 'content' => 'required|string|max:1000',
-                'author_id' => 'required|integer|exists:users,id',
-                'users_id' => 'nullable|integer|exists:users,id',
-                'parent_id' => 'nullable|integer|exists:comments,id'
+                'authors_id' => 'required|string|exists:users,id',
+                'users_id' => 'required|string|exists:users,id',
+                'parent_id' => 'nullable|string'
             ]);
 
-            $comment = Comment::create($validatedData);
+            $comment = Comment::create([
+                'content' => $request->content,
+                'authors_id' => $request->authors_id,
+                'users_id' => $request->users_id,
+                'parent_id' => $request->input('parent_id') ?? null,
+            ]);
 
             return response()->json([
                 'success' => true,
-                'message' => 'Berhasil Post Comment',
+                'message' => 'Terkirim',
                 'data' => $comment,
                 'status_code' => 200
             ], 200);

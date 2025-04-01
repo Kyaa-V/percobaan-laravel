@@ -119,7 +119,7 @@ class AuthController extends Controller
                 'password' => Hash::make($validatedData['password']),
             ]);
 
-            event(new Registered($user));
+            //event(new Registered($user));
 
             $token = $user->createToken('auth-token')->plainTextToken;
 
@@ -127,9 +127,10 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => new UserResource($user),
-                'message' => 'Registrasi Berhasil Silahkan Cek Email Untuk Melakukan Verifikasi.',
-                'token' => $token
+                'data' => new UserResource($user,
+                 "Registrasi Berhasil Silahkan Cek Email Untuk Melakukan Verifikasi.",
+                 200,
+                 $token),
             ], 201);
 
         } catch (ValidationException $e) {
