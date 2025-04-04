@@ -65,7 +65,11 @@ class AuthController extends Controller
                 ], 400);
             }
 
-            $token = $user->createToken('password incoret')->plainTextToken;
+            $user->tokens()->delete();
+            $token = $user->createToken('auth_token', [
+                $user->role->role_name === 'ADMIN' ? ['admin'] : ['user']
+            ])->plainTextToken;
+
             RateLimiter::clear($key);
 
             Cookie::queue('user_token', $token, 18000, '/', null, true, true);
@@ -83,14 +87,12 @@ class AuthController extends Controller
             }
 
             return response()->json($responseData, 200);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi gagal',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             Log::error('Login error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -127,19 +129,19 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => true,
-                'data' => new UserResource($user,
-                 "Registrasi Berhasil Silahkan Cek Email Untuk Melakukan Verifikasi.",
-                 200,
-                 $token),
+                'data' => new UserResource(
+                    $user,
+                    "Registrasi Berhasil Silahkan Cek Email Untuk Melakukan Verifikasi.",
+                    200,
+                    $token
+                ),
             ], 201);
-
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
                 'message' => 'Validasi registrasi gagal',
                 'errors' => $e->errors()
             ], 422);
-
         } catch (\Exception $e) {
             Log::error('Registration error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString(),
@@ -169,7 +171,6 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Email verifikasi telah dikirim ulang.'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Resend verification error: ' . $e->getMessage(), [
                 'user_id' => $request->user()->id ?? null
@@ -210,7 +211,6 @@ class AuthController extends Controller
                 'success' => true,
                 'message' => 'Email berhasil diverifikasi!'
             ]);
-
         } catch (\Exception $e) {
             Log::error('Email verification error: ' . $e->getMessage(), [
                 'user_id' => $id,

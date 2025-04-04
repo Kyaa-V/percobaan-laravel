@@ -10,22 +10,25 @@ use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResourceCollection;
 use Illuminate\Validation\ValidationException;
+use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class UserController extends Controller
 {
 
-    public function updateUser(Request $request, $id)
+    use AuthorizesRequests;
+    
+    public function updatePaswordUser(Request $request, $id)
     {
         try {
-            $validatedData = $request->validate([
+            $request->validate([
                 'password' => 'required|min:6|max:100',
             ]);
 
             $user = User::findOrFail($id);
-            
+
             $user->update([
-                "password" => Hash::make($validatedData['password']),
+                "password" => Hash::make($request->password),
             ]);
 
             return response()->json([
@@ -33,20 +36,17 @@ class UserController extends Controller
                 "message" => "Password berhasil diupdate",
                 "data" => new UserResource($user)
             ]);
-
         } catch (ValidationException $e) {
             return response()->json([
                 "success" => false,
                 "message" => "Validasi gagal",
                 "errors" => $e->errors()
             ], 422);
-
         } catch (NotFoundHttpException $e) {
             return response()->json([
                 "success" => false,
                 "message" => "User tidak ditemukan"
             ], 404);
-
         } catch (\Exception $e) {
             Log::error('Update user error: ' . $e->getMessage(), [
                 'user_id' => $id,
@@ -73,7 +73,6 @@ class UserController extends Controller
                     "users" => new UserResourceCollection($users)
                 ]
             ]);
-
         } catch (\Exception $e) {
             Log::error('Get users error: ' . $e->getMessage(), [
                 'trace' => $e->getTraceAsString()
@@ -94,19 +93,19 @@ class UserController extends Controller
     {
         try {
             $user = User::findOrFail($id);
+
+            $this->authorize('delete',$user);
             $user->delete();
 
             return response()->json([
                 "success" => true,
                 "message" => "Berhasil menghapus user"
             ]);
-
         } catch (NotFoundHttpException $e) {
             return response()->json([
                 "success" => false,
                 "message" => "User tidak ditemukan"
             ], 404);
-
         } catch (\Exception $e) {
             Log::error('Delete user error: ' . $e->getMessage(), [
                 'user_id' => $id,
@@ -132,13 +131,11 @@ class UserController extends Controller
                 "success" => true,
                 "data" => new UserResource($user, "User dengan nama: {$user->name} ditemukan")
             ]);
-
         } catch (NotFoundHttpException $e) {
             return response()->json([
                 "success" => false,
                 "message" => "User tidak ditemukan"
             ], 404);
-
         } catch (\Exception $e) {
             Log::error('Get user by ID error: ' . $e->getMessage(), [
                 'user_id' => $id,

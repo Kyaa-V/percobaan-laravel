@@ -10,3 +10,4 @@ Route::put('/', function(){
 require __DIR__ . '/api/auth.php';
 require __DIR__ . '/api/users.php';
 require __DIR__ . '/api/comment.php';
+require __DIR__ . '/api/experience.php';

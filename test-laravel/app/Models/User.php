@@ -49,6 +49,9 @@ namespace App\Models;
         public function authorComments(){
             return $this->hasMany(Comment::class,'users_id');
         }
+        public function experience(){
+            return $this->hasMany(Experience::class,'users_id');
+        }
 
 
 
