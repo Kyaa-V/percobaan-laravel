@@ -2,7 +2,6 @@
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\expController;
-use App\Http\Middleware\RoleUser;
 
 
 Route::middleware(['auth:sanctum'])->group(function () {

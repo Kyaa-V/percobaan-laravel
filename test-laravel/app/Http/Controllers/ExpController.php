@@ -19,7 +19,6 @@ class ExpController extends Controller
 
     public function postExperience(Request $request)
     {
-
         try {
             $request->validate([
                 'position' => 'required|string|max:255',
