@@ -37,7 +37,7 @@ class PersonalPolicy
      */
     public function update(User $user, PersonalData $personalData): bool
     {
-        return false;
+        return $user->id === $personalData->users_id;
     }
 
     /**

@@ -14,7 +14,6 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CommentController extends Controller
 {
-
     use AuthorizesRequests;
 
     public function getCommentsByAuthor($authorId)
