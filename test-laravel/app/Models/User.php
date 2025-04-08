@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Models\Role;
+use App\Models\auth\Role;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;

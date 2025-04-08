@@ -92,7 +92,7 @@ class PersonalDataController extends Controller
             ], 500);
         }
     }
-    public function editExpById(Request $request, $id)
+    public function editDataPersonalById(Request $request, $id)
     {
         try {
             $request->validate([

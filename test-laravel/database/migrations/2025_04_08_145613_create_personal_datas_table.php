@@ -19,7 +19,8 @@ return new class extends Migration
             $table->string('name_city');
             $table->string('name_province');
             $table->string('name_country');
-            $table->foreignId('city_id')->constrained('cities')->cascadeOnDelete();
+            $table->mediumInteger('city_id')->unsigned()->nullable();
+            $table->foreign('city_id')->references('id')->on('cities')->cascadeOnDelete();
             $table->string('code');
         });
         }
