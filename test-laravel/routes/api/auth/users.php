@@ -2,7 +2,7 @@
 
 use App\Http\Middleware\RoleUser;
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\UserController;
+use App\Http\Controllers\auth\UserController;
 
 
 Route::middleware('auth:sanctum')->group(function () {

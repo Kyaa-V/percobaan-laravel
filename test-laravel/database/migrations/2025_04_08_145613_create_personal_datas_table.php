@@ -16,12 +16,15 @@ return new class extends Migration
             $table->string('name');
             $table->string('birthdays');
             $table->string('your_address');
-            $table->string('name_city');
-            $table->string('name_province');
             $table->string('name_country');
+            $table->string('name_province');
+            $table->string('name_city');
+            $table->string('numberOfPhone');
+            $table->string('code');
             $table->mediumInteger('city_id')->unsigned()->nullable();
             $table->foreign('city_id')->references('id')->on('cities')->cascadeOnDelete();
-            $table->string('code');
+            $table->foreignUuid('users_id')->constrained('users')->cascadeOnDelete();
+            $table->timestamps();
         });
         }
 

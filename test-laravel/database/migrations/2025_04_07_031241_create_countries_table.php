@@ -35,8 +35,7 @@ return new class extends Migration
             $table->decimal('longitude', 11, 8)->nullable();
             $table->string('emoji')->nullable();
             $table->string('emojiU')->nullable();
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
             $table->boolean('flag')->default(0);
             $table->string('wikiDataId')->nullable(); // wikiDataId (varchar)
         });

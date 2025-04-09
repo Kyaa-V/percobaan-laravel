@@ -20,11 +20,18 @@ class PersonalDataController extends Controller
                 'name' => 'required|string|max:255',
                 'birthdays' => 'required|string|regex:/^\d{1,2} [A-Za-z]+ \d{4}$/',
                 'your_address' => 'required|string|max:500',
-                'name_city' => 'required|string|max:255',
-                'name_province' => 'required|string|max:255',
+                'name_country' => 'required|string|max:255|exists:countries,name',
+                'name_province' => 'required|string|max:255|exists:states,name',
+                'name_city' => 'required|string|max:255|exists:cities,name',
+                'city_id' => 'required|string|max:255',
                 'code' => 'required|string|max:20',
-                'numberOfPhone' => 'required|string|max:20|regex:/^[0-9]+$/',
-                'name_country' => 'required|string|max:255',
+                'users_id' => 'required|string',
+                'numberOfPhone' => [
+                    'required',
+                    'string',
+                    'max:20',
+                    'regex:/^\+[0-9]+$/'
+                ],
             ]);
 
             $checkDataExists = PersonalData::where('name', $validatedData['name'])

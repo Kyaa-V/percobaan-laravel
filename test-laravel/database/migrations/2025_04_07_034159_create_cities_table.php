@@ -20,8 +20,7 @@ return new class extends Migration
             $table->char('country_code', 2)->nullable();
             $table->decimal('latitude', 10, 8)->nullable();
             $table->decimal('longitude', 11, 8)->nullable();
-            $table->timestamp('created_at')->nullable();
-            $table->timestamp('updated_at')->nullable();
+            $table->timestamps();
             $table->boolean('flag')->default(0);
             $table->string('wikiDataId')->nullable();
 

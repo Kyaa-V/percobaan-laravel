@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Relations\Pivot;
 class PersonalData extends Pivot
 {
     
+    protected $table = 'personal_datas';
 
 
     public function city()
