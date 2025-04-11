@@ -7,6 +7,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\CommentResource;
+use App\Trait\MonitoringLong;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,16 +15,18 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 class CommentController extends Controller
 {
-    use AuthorizesRequests;
+    use AuthorizesRequests, MonitoringLong;
 
     public function getCommentsByAuthor($authorId)
     {
+        $start = microtime(true);
         try {
             $comments = Comment::with(['author', 'replies.author'])
                 ->where('authors_id', $authorId)
                 ->whereNull('parent_id')
                 ->orderBy('created_at', 'desc')
                 ->get();
+            $this->logLongProcess("get comment error", $start);
 
             return response()->json([
                 'success' => true,
@@ -38,6 +41,7 @@ class CommentController extends Controller
     }
     public function postComment(Request $request)
     {
+        $start = microtime(true);
         try {
             $request->validate([
                 'content' => 'required|string|max:1000',
@@ -52,6 +56,7 @@ class CommentController extends Controller
                 'users_id' => $request->users_id,
                 'parent_id' => $request->input('parent_id') ?? null,
             ]);
+            $this->logLongProcess("post comment error", $start);
 
             return response()->json([
                 'success' => true,
@@ -80,12 +85,14 @@ class CommentController extends Controller
 
     public function deleteCommentById($id)
     {
+        $start = microtime(true);
         try {
             $comment = Comment::findOrFail($id);
 
             $this->authorize('delete', $comment);
 
             $comment->delete();
+            $this->logLongProcess("delete comment error", $start);
 
             return response()->json([
                 'success' => true,
@@ -114,6 +121,7 @@ class CommentController extends Controller
 
     public function editCommentById(Request $request, $id)
     {
+        $start = microtime(true);
         try {
             $validated = $request->validate([
                 'content' => 'required|string|max:1000',
@@ -125,6 +133,7 @@ class CommentController extends Controller
             $comment->update([
                 'content' => $validated['content'],
             ]);
+            $this->logLongProcess("edit comment error", $start);
 
             return response()->json([
                 'success' => true,

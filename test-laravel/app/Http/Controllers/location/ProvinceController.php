@@ -5,21 +5,26 @@ namespace App\Http\Controllers\location;
 use App\Http\Resources\ProvinceResource;
 use Illuminate\Http\Request;
 use App\Models\location\States;
+use App\Trait\MonitoringLong;
 use Illuminate\Support\Facades\Log;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class ProvinceController
 {
+    use MonitoringLong;
+
     public function getProvince()
     {
+        $start = microtime(true);
         try {
             $province = States::all();
+            $this->logLongProcess("get province", $start);
 
             return response()->json([
                 "success" => true,
                 "data" => [
                     "message" => "Berhasil get data province",
-                    "province"=> new ProvinceResource($province)
+                    "province" => new ProvinceResource($province)
                 ]
             ]);
         } catch (\Exception $e) {
@@ -37,8 +42,10 @@ class ProvinceController
 
     public function getProvinceByCountryId($id)
     {
+        $start = microtime(true);
         try {
-            $province = States::where('country_id',$id)->get();
+            $province = States::where('country_id', $id)->get();
+            $this->logLongProcess("get province", $start);
 
             return response()->json([
                 "success" => true,
@@ -58,7 +65,7 @@ class ProvinceController
             return response()->json([
                 "success" => false,
                 "message" => "Terjadi kesalahan saat mengambil data province",
-                "error"=> $e->getMessage()
+                "error" => $e->getMessage()
             ], 500);
         }
     }

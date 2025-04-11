@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('personal_datas', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('your_field');
             $table->string('birthdays');
             $table->string('your_address');
             $table->string('name_country');

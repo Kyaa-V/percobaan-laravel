@@ -1,9 +1,10 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\privasi;
 
-use App\Models\Experience;
 use Illuminate\Http\Request;
+use App\Models\privasi\Experience;
+use App\Trait\MonitoringLong;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Validation\ValidationException;
@@ -15,10 +16,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class ExpController extends Controller
 {
 
-    use AuthorizesRequests;
+    use AuthorizesRequests, MonitoringLong;
 
     public function postExperience(Request $request)
     {
+        $start = microtime(true);
         try {
             $request->validate([
                 'position' => 'required|string|max:255',
@@ -31,8 +33,9 @@ class ExpController extends Controller
                 'end_date' => 'required|date|after_or_equal:start_date',
             ]);
 
-            $checkDataExists = Experience::where('company', $request->company)
+            $checkDataExists = Experience::where('users_id', $request->users_id)
                 ->where('location', $request->location)
+                ->where('company', $request->company)
                 ->where('status', $request->status)
                 ->where('start_date', $request->start_date)->first();
 
@@ -53,7 +56,7 @@ class ExpController extends Controller
                 'end_date' => $request->end_date,
                 'users_id' => $request->users_id,
             ]);
-
+            $this->logLongProcess("post experience error", $start);
             return response()->json([
                 'success' => true,
                 'message' => 'Berhasil Memasukkan data experience',
@@ -79,9 +82,10 @@ class ExpController extends Controller
     }
     public function getExperience($id)
     {
+        $start = microtime(true);
         try {
             $exp = Experience::where('users_id', $id)->get();
-
+            $this->logLongProcess("get experience error", $start);
             return response()->json([
                 "success" => true,
                 "message" => "Berhasil mendaptkan data pengalaman",
@@ -93,7 +97,7 @@ class ExpController extends Controller
                 "message" => "Data tidak di temukan"
             ], 404);
         } catch (\Exception $e) {
-            Log::error('Delete user error: ' . $e->getMessage(), [
+            Log::error('get form exp by id error: ' . $e->getMessage(), [
                 'user_id' => $id,
                 'trace' => $e->getTraceAsString()
             ]);
@@ -107,13 +111,14 @@ class ExpController extends Controller
     }
     public function deleteExpById($id)
     {
+        $start = microtime(true);
         try {
             $exp = Experience::findOrFail($id);
 
             $this->authorize('delete', $exp);
 
             $exp->delete();
-
+            $this->logLongProcess("delete experience error", $start);
             return response()->json([
                 'success' => true,
                 'data' => [
@@ -141,6 +146,7 @@ class ExpController extends Controller
 
     public function editExpById(Request $request, $id)
     {
+        $start = microtime(true);
         try {
             $request->validate([
                 'position' => 'string|max:255',
@@ -151,11 +157,11 @@ class ExpController extends Controller
                 'users_id' => 'string|exists:users,id',
                 'start_date' => 'date',
                 'end_date' => 'date|after_or_equal:start_date',
-           ]);
+            ]);
 
             $exp = Experience::findOrFail($id);
             $this->authorize('update', $exp);
-
+            $this->logLongProcess("edit experience error", $start);
             $exp->update([
                 'position' =>  $request->position ?? $exp->position,
                 'company' =>  $request->company ?? $exp->company,
@@ -194,7 +200,7 @@ class ExpController extends Controller
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat memperbarui Data',
-                'error' => $th->getMessage()//env('APP_DEBUG') ? $th->getMessage() : null
+                'error' => $th->getMessage() //env('APP_DEBUG') ? $th->getMessage() : null
             ], 500);
         }
     }

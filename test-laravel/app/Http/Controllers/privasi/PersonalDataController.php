@@ -1,11 +1,12 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\privasi;
 
-use App\Models\PersonalData;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
+use App\Models\privasi\PersonalData;
+use App\Trait\MonitoringLong;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -13,11 +14,15 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PersonalDataController extends Controller
 {
+    use MonitoringLong;
+
     public function postDataPersonal(Request $request)
     {
+        $start = microtime(true);
         try {
             $validatedData = $request->validate([
                 'name' => 'required|string|max:255',
+                'your_field' => 'required|string|max:255',
                 'birthdays' => 'required|string|regex:/^\d{1,2} [A-Za-z]+ \d{4}$/',
                 'your_address' => 'required|string|max:500',
                 'name_country' => 'required|string|max:255|exists:countries,name',
@@ -48,6 +53,7 @@ class PersonalDataController extends Controller
             }
 
             $personalData = PersonalData::create($validatedData);
+            $this->logLongProcess("post data personal error", $start);
 
             return response()->json([
                 'success' => true,
@@ -75,17 +81,21 @@ class PersonalDataController extends Controller
     }
     public function getDataPersonalById($id)
     {
+        $start = microtime(true);
         try {
             $personal = PersonalData::findOrFail($id);
+            $this->logLongProcess("get data personal error", $start);
 
             return response()->json([
                 "success" => true,
-                'message' => 'Data Berhasil Di Load'
+                'message' => 'Data Berhasil Di Load',
+                "datas" => $personal
             ]);
         } catch (NotFoundHttpException $e) {
             return response()->json([
                 "success" => false,
-                "message" => "Data Tidak Di Temukan"
+                "message" => "Data Tidak Di Temukan",
+                "error" => $e->getMessage()
             ], 404);
         } catch (\Exception $e) {
             Log::error('Get data by ID error: ' . $e->getMessage(), [
@@ -101,9 +111,11 @@ class PersonalDataController extends Controller
     }
     public function editDataPersonalById(Request $request, $id)
     {
+        $start = microtime(true);
         try {
             $request->validate([
                 'name' => 'required|string|max:255',
+                'your_field' => 'required|string|max:255',
                 'birthdays' => 'required|string|regex:/^\d{1,2} [A-Za-z]+ \d{4}$/',
                 'your_address' => 'required|string|max:500',
                 'name_city' => 'required|string|max:255',
@@ -118,6 +130,7 @@ class PersonalDataController extends Controller
 
             $personal->update([
                 'name' =>  $request->name ?? $personal->name,
+                'your_field' =>  $request->your_field ?? $personal->your_field,
                 'birthdays' =>  $request->birthdays ?? $personal->birthdays,
                 'your_address' =>  $request->your_address ?? $personal->your_address,
                 'name_city' =>  $request->name_city ?? $personal->name_city,
@@ -126,6 +139,7 @@ class PersonalDataController extends Controller
                 'numberOfPhone' =>  $request->numberOfPhone ?? $personal->numberOfPhone,
                 'name_country' =>  $request->name_country ?? $personal->name_country,
             ]);
+            $this->logLongProcess("update data personal error", $start);
 
             return response()->json([
                 'success' => true,
@@ -151,6 +165,10 @@ class PersonalDataController extends Controller
                 'message' => 'Anda tidak memiliki izin untuk mengedit Data ini'
             ], 403);
         } catch (\Throwable $th) {
+            Log::error('error in table personal data: ' . $th->getMessage(), [
+                'user_id' => $id,
+                'trace' => $th->getTraceAsString()
+            ]);
             return response()->json([
                 'success' => false,
                 'message' => 'Terjadi kesalahan saat memperbarui Data',

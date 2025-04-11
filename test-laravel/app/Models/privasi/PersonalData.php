@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\privasi;
 
 use App\Models\location\City;
 use App\Models\location\Country;

@@ -1,7 +1,7 @@
 <?php
 
-use App\Http\Controllers\PersonalDataController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\privasi\PersonalDataController;
 
 
 Route::middleware(['auth:sanctum'])->group(function () {

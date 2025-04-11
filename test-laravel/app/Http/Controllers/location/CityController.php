@@ -6,22 +6,26 @@ use Illuminate\Http\Request;
 use App\Models\location\City;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\CityResource;
+use App\Trait\MonitoringLong;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class CityController
 {
+    use MonitoringLong;
+
     public function getCity()
     {
+        $start = microtime(true);
         try {
-            $city = City::select('idCountry','name','state_id','state_code','country_id','country_code')->paginate(15);
+            $city = City::select('idCountry', 'name', 'state_id', 'state_code', 'country_id', 'country_code')->paginate(15);
             Log::info('Masuk ke method get-city');
-
+            $this->logLongProcess("get city", $start);
             return response()->json([
                 "success" => true,
                 "data" => [
-                    "success"=>true,
+                    "success" => true,
                     "message" => "Berhasil get data city",
-                    "city"=> new CityResource($city)
+                    "city" => new CityResource($city)
                 ]
             ]);
         } catch (\Exception $e) {
@@ -37,11 +41,14 @@ class CityController
         }
     }
 
-    public function getCityByProvinceId($idCountry ,$idProvince)
+    public function getCityByProvinceId($idCountry, $idProvince)
     {
+        $start = microtime(true);
         try {
-            $city = City::where('country_id',$idCountry)->where('state_id',$idProvince)->get();
-
+            $city = City::where('country_id', $idCountry)->where('state_id', $idProvince)->get();
+     
+            $this->logLongProcess("get city id", $start);
+  
             return response()->json([
                 "success" => true,
                 "message" => "Berhasil get data city",

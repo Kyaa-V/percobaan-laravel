@@ -16,7 +16,7 @@ class LogsController
                 "success" => true,
                 "amount_users" => $logs->total(),
                 "data" => [
-                    "message" => "Berhasil get data user",
+                    "message" => "Berhasil get data logs",
                     "logs" => $logs
                 ]
             ]);

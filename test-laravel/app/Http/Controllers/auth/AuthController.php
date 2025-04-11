@@ -8,6 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use App\Http\Resources\UserResource;
+use App\Traits\MonitoringLog;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
@@ -21,6 +22,7 @@ use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 class AuthController extends Controller
 {
+
     public function login(Request $request): JsonResponse
     {
         try {

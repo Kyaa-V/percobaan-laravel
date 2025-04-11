@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResourceCollection;
+use App\Trait\MonitoringLong;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -16,10 +17,11 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 class UserController extends Controller
 {
 
-    use AuthorizesRequests;
+    use AuthorizesRequests,MonitoringLong;
     
     public function updatePaswordUser(Request $request, $id)
     {
+        $start = microtime(true);
         try {
             $request->validate([
                 'password' => 'required|min:6|max:100',
@@ -30,6 +32,8 @@ class UserController extends Controller
             $user->update([
                 "password" => Hash::make($request->password),
             ]);
+
+            $this->logLongProcess('update password user', $start);
 
             return response()->json([
                 "success" => true,
@@ -62,8 +66,10 @@ class UserController extends Controller
 
     public function get()
     {
+        $start = microtime(true);
         try {
             $users = User::with('role')->paginate(15);
+            $this->logLongProcess("get user", $start);
 
             return response()->json([
                 "success" => true,
@@ -91,11 +97,13 @@ class UserController extends Controller
      */
     public function deleteUser($id)
     {
+        $start = microtime(true);
         try {
             $user = User::findOrFail($id);
 
             $this->authorize('delete',$user);
             $user->delete();
+            $this->logLongProcess("delete user", $start);
 
             return response()->json([
                 "success" => true,
@@ -124,8 +132,10 @@ class UserController extends Controller
      */
     public function getById($id)
     {
+        $start = microtime(true);
         try {
             $user = User::findOrFail($id);
+            $this->logLongProcess("get by id user", $start);
 
             return response()->json([
                 "success" => true,

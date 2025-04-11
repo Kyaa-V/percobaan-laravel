@@ -4,6 +4,7 @@ namespace App\Models;
 
 use App\Models\auth\Role;
 use Laravel\Sanctum\HasApiTokens;
+use App\Models\privasi\Experience;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
