@@ -24,15 +24,15 @@ class EducationController
                 "graduation_years" => "required|string",
                 "name_schools" => "required|string",
                 "schools" => "required|in:SMA/SMK,PERGURUAN TINGGI,SMP,SD",
-                "type_schools" => "required|in:SWASTA,NEGERI'",
+                "type_schools" => "required|in:SWASTA,NEGERI",
                 "average_value" => "required|string",
                 "diploma_date" => "required|string",
                 "major" => "required|string",
-                "diploma_date" => "required|string|max:36",
+                "users_id" => "required|string|max:36",
             ]);
 
 
-            $checkDataExists = Education::where('diploma_date', $request->diploma_date)
+            $checkDataExists = Education::where('users_id', $request->users_id)
                 ->where('graduation_years', $request->graduation_years)
                 ->where('name_schools', $request->name_schools)
                 ->where('major', $request->major)

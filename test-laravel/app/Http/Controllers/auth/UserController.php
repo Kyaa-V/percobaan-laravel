@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\auth;
 
-use App\Models\User;
+use App\Models\auth\User;
 use Illuminate\Http\Request;
+use App\Trait\MonitoringLong;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
 use Illuminate\Support\Facades\Hash;
 use App\Http\Resources\UserResourceCollection;
-use App\Trait\MonitoringLong;
 use Illuminate\Validation\ValidationException;
 use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;

@@ -3,19 +3,19 @@
 namespace App\Http\Controllers\auth;
 
 use Carbon\Carbon;
-use App\Models\User;
+use App\Models\auth\User;
 use Illuminate\Http\Request;
+use App\Traits\MonitoringLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use Illuminate\Support\Facades\Log;
 use App\Http\Resources\UserResource;
-use App\Traits\MonitoringLog;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cookie;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;

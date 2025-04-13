@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Models;
+namespace App\Models\auth;
 
+use App\Models\Comment;
 use App\Models\auth\Role;
+use App\Models\privasi\Education;
 use Laravel\Sanctum\HasApiTokens;
 use App\Models\privasi\Experience;
+use App\Models\privasi\Pregister_schools;
+use App\Models\privasi\Student;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
@@ -48,9 +52,21 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
+    public function pregister()
+    {
+        return $this->belongsTo(Pregister_schools::class, 'users_id');
+    }
+    public function student()
+    {
+        return $this->belongsTo(Student::class, 'users_id');
+    }
     public function comments()
     {
         return $this->hasMany(Comment::class, 'author_id');
+    }
+    public function education()
+    {
+        return $this->hasMany(Education::class, 'users_id');
     }
     public function authorComments()
     {
