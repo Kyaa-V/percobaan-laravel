@@ -15,10 +15,10 @@ return new class extends Migration
             $table->id();
             $table->string('name');
             $table->string('image_profile')->nullable();
-            $table->string('class');
-            $table->string('major');
-            $table->string('role_number');
+            $table->string('class')->nullable();
+            $table->string('roll_number');
             $table->string('status_at-leatest')->default('offline');
+            $table->foreignId('majors_id')->references('id')->on('majors')->cascadeOnDelete();
             $table->foreignUuid('users_id')->references('id')->on('users')->cascadeOnDelete();
             $table->foreignid('pregister_id')->references('id')->on('pregister_schools')->cascadeOnDelete();
             $table->timestamps();

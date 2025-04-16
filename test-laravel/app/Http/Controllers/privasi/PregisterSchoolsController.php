@@ -2,22 +2,38 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\privasi\StorePregisterRequest;
 use Illuminate\Http\Request;
+use App\Trait\MonitoringLong;
 use Illuminate\Support\Facades\Log;
 use App\Models\privasi\Pregister_schools;
-use App\Trait\MonitoringLong;
 use Illuminate\Validation\ValidationException;
+use App\Http\Requests\privasi\StorePregisterRequest;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 class PregisterSchoolsController
 {
     use MonitoringLong;
 
-    public function postEducation(StorePregisterRequest $request)
+    public function postPregister(Request $request)
     {
         $start = microtime(true);
         try {
-            $validationRequest = $request->validated();
+            $validationRequest = $request->validate([
+                "name" => "required|string",
+                "emails" => "required|email",
+                "schools" => "required|string",
+                "photo" => "required|image",
+                "SKL" => "required|image",
+                "KTP" => "required|image",
+                "AKTA_KELAHIRAN" => "required|image",
+                "RAPORT" => "required|image",
+                "NISN" => "required|string",
+                "NPSN" => "required|string",
+                "major" => "required|string|exists:majors,name",
+                "PRESTASI" => "required|image",
+                "status" => "required|string|in:PREDAFTAR,SISWA,LULUS",
+                "users_id" => "required|string|max:36",
+            ]);
 
 
             $checkDataExists = Pregister_schools::where('users_id', $request->users_id)
@@ -38,7 +54,7 @@ class PregisterSchoolsController
             $this->logLongProcess("get data education", $start);
             return response()->json([
                 'success' => true,
-                'message' => 'Data personal berhasil disimpan',
+                'message' => 'Data pregister berhasil disimpan',
                 'data' => $educations
             ], 201);
         } catch (ValidationException $e) {
@@ -56,6 +72,36 @@ class PregisterSchoolsController
                 'success' => false,
                 'message' => 'Terjadi kesalahan sistem saat melakukan post form experience',
                 'error' => $e
+            ], 500);
+        }
+    }
+    public function getDataPregisterById($id)
+    {
+        $start = microtime(true);
+        try {
+            $pregister = Pregister_schools::findOrFail($id);
+            $this->logLongProcess("get data pregister error", $start);
+
+            return response()->json([
+                "success" => true,
+                'message' => 'Data Berhasil Di Load',
+                "datas" => $pregister
+            ]);
+        } catch (NotFoundHttpException $e) {
+            return response()->json([
+                "success" => false,
+                "message" => "Data Tidak Di Temukan",
+                "error" => $e->getMessage()
+            ], 404);
+        } catch (\Exception $e) {
+            Log::error('Get data by ID error: ' . $e->getMessage(), [
+                'user_id' => $id,
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan saat mengambil data yang  ada"
             ], 500);
         }
     }

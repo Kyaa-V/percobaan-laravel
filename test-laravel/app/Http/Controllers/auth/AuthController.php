@@ -5,7 +5,6 @@ namespace App\Http\Controllers\auth;
 use Carbon\Carbon;
 use App\Models\auth\User;
 use Illuminate\Http\Request;
-use App\Traits\MonitoringLog;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Illuminate\Support\Facades\Log;
@@ -17,21 +16,22 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\RateLimiter;
+use App\Http\Requests\auth\StoreUserRequest;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\TooManyRequestsHttpException;
 
 class AuthController extends Controller
 {
 
-    public function login(Request $request): JsonResponse
+    public function login(Request $request)
     {
         try {
-            $request->validate([
+            $validatedRequest = $request->validate([
                 'email' => 'required|email',
                 'password' => 'required',
             ]);
-
-            $user = User::where('email', $request->email)->first();
+            
+            $user = User::where('email', $validatedRequest('email'))->first();
 
             if (!$user) {
                 return response()->json([
@@ -103,7 +103,8 @@ class AuthController extends Controller
 
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan sistem saat login'
+                'message' => 'Terjadi kesalahan sistem saat login',
+                "error" => $e->getMessage()
             ], 500);
         }
     }

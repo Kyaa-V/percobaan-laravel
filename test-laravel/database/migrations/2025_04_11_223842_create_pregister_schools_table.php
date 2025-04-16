@@ -23,8 +23,8 @@ return new class extends Migration
             $table->string('RAPORT');
             $table->string('NISN');
             $table->string('NPSN');
-            $table->string('major');
             $table->string('PRESTASI')->nullable();
+            $table->foreignId('majors_id')->references('id')->on('majors')->cascadeOnDelete();
             $table->foreignUuid('users_id')->references('id')->on('users')->cascadeOnDelete();
             $table->enum('status',['PREDAFTAR', 'SISWA', 'LULUS']);
             $table->timestamps();
