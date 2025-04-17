@@ -105,4 +105,31 @@ class PregisterSchoolsController
             ], 500);
         }
     }
+    public function getDataPregister()
+    {
+        $start = microtime(true);
+        try {
+            $pregister = Pregister_schools::paginate(15);
+            $this->logLongProcess("get user", $start);
+
+            return response()->json([
+                "success" => true,
+                "amount"=>$pregister->total(),
+                "data" => [
+                    "message" => "Berhasil get data user",
+                    "data" => $pregister
+                ]
+            ]);
+        } catch (\Exception $e) {
+            Log::error('Get pregister error: ' . $e->getMessage(), [
+                'trace' => $e->getTraceAsString()
+            ]);
+
+            return response()->json([
+                "success" => false,
+                "message" => "Terjadi kesalahan saat mengambil data user",
+                "error" => $e->getMessage()
+            ], 500);
+        }
+    }
 }

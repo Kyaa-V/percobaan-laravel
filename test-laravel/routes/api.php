@@ -1,4 +1,4 @@
-<?php
+    <?php
 
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\PregisterSchoolsController;
@@ -15,8 +15,5 @@ require __DIR__ . '/api/logs.php';
 require __DIR__ . '/api/privasi/personal-data.php';
 require __DIR__ . '/api/privasi/experience.php';
 require __DIR__ . '/api/privasi/education.php';
+require __DIR__ . '/api/privasi/pregister.php';
 require __DIR__ . '/api/location/location.php';
-
-Route::middleware(['auth:sanctum'])->group(function () {
-    Route::post('/pregister', [PregisterSchoolsController::class, 'postPregister']);
-});
