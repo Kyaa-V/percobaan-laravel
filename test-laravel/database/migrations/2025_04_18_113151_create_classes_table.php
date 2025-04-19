@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('classes', function (Blueprint $table) {
             $table->id();
-            $table->string('name_class');
+            $table->string('name_class'); //XTKJ 1 XTKJ 2 XTKJ 3
             $table->foreignId('classles_id')->references('id')->on('main_classes')->cascadeOnDelete();
             $table->foreignId('majors_id')->references('id')->on('majors')->cascadeOnDelete();
             $table->timestamps();

@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('main_classes', function (Blueprint $table) {
             $table->id();
-            $table->string('class');
+            $table->string('class')->default('10'); // 10 11 12
             $table->timestamps();
         });
     }
