@@ -13,7 +13,7 @@ class Major
 {
     use AuthorizesRequests, MonitoringLong;
 
-    public function postClass(Request $request)
+    public function postMajor(Request $request)
     {
         $start = microtime(true);
         try {
