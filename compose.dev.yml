@@ -1,0 +1,137 @@
+services:
+  web:
+    image: nginx:latest # Using the default Nginx image with custom configuration.
+    container_name: nginx-web
+    volumes:
+      # Mount the application code for live updates
+      - ./:/var/www
+      # Mount the Nginx configuration file
+      - ./test-laravel/docker/development/nginx/nginx.conf:/etc/nginx/nginx.conf:ro
+    ports:
+      # Map port 80 inside the container to the port specified by 'NGINX_PORT' on the host machine
+      - "80:80"
+    environment:
+      - NGINX_HOST=localhost
+    networks:
+      - laravel-development
+    depends_on:
+      php-fpm:
+        condition: service_started  # Wait for php-fpm to start
+
+  php-fpm:
+    # For the php-fpm service, we will create a custom image to install the necessary PHP extensions and setup proper permissions.
+    build:
+      context: ./test-laravel
+      dockerfile: ./docker/common/php-fpm/Dockerfile
+      target: development
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: develop,coverage,debug,profile
+        XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+        XDEBUG_LOG: /dev/stdout
+        XDEBUG_LOG_LEVEL: 0
+    env_file:
+      # Load the environment variables from the Laravel application
+      - ./test-laravel/.env
+    user: "${UID:-1000}:${GID:-1000}"
+    container_name: php-fpm
+    volumes:
+      # Mount the application code for live updates
+      - ./:/var/www
+    networks:
+      - laravel-development
+    depends_on:
+      mysql-db:
+        condition: service_started  # Wait for postgres to start
+
+  workspace:
+   # For the workspace service, we will also create a custom image to install and setup all the necessary stuff.
+    build:
+      context: ./test-laravel
+      dockerfile: ./docker/development/workspace/Dockerfile
+      args:
+        UID: ${UID:-1000}
+        GID: ${GID:-1000}
+        XDEBUG_ENABLED: ${XDEBUG_ENABLED:-true}
+        XDEBUG_MODE: develop,coverage,debug,profile
+        XDEBUG_HOST: ${XDEBUG_HOST:-host.docker.internal}
+        XDEBUG_IDE_KEY: ${XDEBUG_IDE_KEY:-DOCKER}
+        XDEBUG_LOG: /dev/stdout
+        XDEBUG_LOG_LEVEL: 0
+    container_name: laravel_workspace
+    ports:
+      - '8000:80'  # Expose port 8000 for the workspace
+    tty: true  # Enables an interactive terminal
+    stdin_open: true  # Keeps the stdin open
+    env_file:
+      - ./test-laravel/.env
+    volumes:
+      - ./:/var/www
+    networks:
+      - laravel-development
+
+  mysql-db:
+    image: mysql:8
+    container_name: laravel_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1215161
+      MYSQL_DATABASE: portofolio
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel-development
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1215161"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel_phpmyadmin
+    restart: always
+    ports:
+      - "8001:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: 1215161
+    depends_on:
+      - mysql-db
+    networks:
+      - laravel-development
+
+
+  nuxt-frontend:
+    build:
+      context: ./nuxt-app
+      dockerfile: Dockerfile
+    container_name: nuxt-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nuxt-app:/app
+    command: npm run dev
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - laravel-development
+    depends_on:
+      - workspace
+      - mysql-db
+  redis:
+    image: redis:alpine
+    networks:
+      - laravel-development
+
+networks:
+  laravel-development:
+
+volumes:
+  mysql_data:

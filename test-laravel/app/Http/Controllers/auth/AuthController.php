@@ -126,7 +126,7 @@ class AuthController extends Controller
 
             //event(new Registered($user));
 
-            $token = $user->createToken('auth-token')->plainTextToken;
+            $token = $user->createToken($user->id)->plainTextToken;
 
             Cookie::queue('user_token', $token, 18000, '/', null, true, true);
 

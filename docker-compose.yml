@@ -1,0 +1,79 @@
+version: '3.8'
+
+services:
+  app:
+    build:
+      context: ./test-laravel
+      dockerfile: Dockerfile
+    container_name: test-laravel
+    ports:
+      - "8000:80"
+    environment:
+      DB_CONNECTION: mysql
+      DB_HOST: mysql
+      DB_DATABASE: portofolio
+      DB_USERNAME: root
+      DB_PASSWORD: 1215161
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - laravel
+
+  nuxt-frontend:
+    build:
+      context: ./nuxt-app
+      dockerfile: Dockerfile
+    container_name: nuxt-frontend
+    ports:
+      - "3000:3000"
+    volumes:
+      - ./nuxt-app:/app
+    command: npm run dev
+    environment:
+      - CHOKIDAR_USEPOLLING=true
+    networks:
+      - laravel
+    depends_on:
+      - app
+      - mysql
+
+  mysql:
+    image: mysql:8
+    container_name: laravel_mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 1215161
+      MYSQL_DATABASE: portofolio
+    ports:
+      - "3307:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+    networks:
+      - laravel
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p1215161"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: laravel_phpmyadmin
+    restart: always
+    ports:
+      - "8001:80"
+    environment:
+      PMA_HOST: mysql
+      PMA_PORT: 3306
+      MYSQL_ROOT_PASSWORD: 1215161
+    depends_on:
+      - mysql
+    networks:
+      - laravel
+
+networks:
+  laravel:
+
+volumes:
+  mysql_data:

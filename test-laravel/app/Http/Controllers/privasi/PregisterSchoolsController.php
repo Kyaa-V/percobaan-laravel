@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\privasi;
 
 use Illuminate\Http\Request;
 use App\Trait\MonitoringLong;

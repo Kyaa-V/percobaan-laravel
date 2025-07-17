@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\privasi;
 
 use App\Models\Classes;
 use Illuminate\Http\Request;

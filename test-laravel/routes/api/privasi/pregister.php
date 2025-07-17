@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\PregisterSchoolsController;
+use App\Http\Controllers\privasi\PregisterSchoolsController;
 
 Route::middleware(['auth:sanctum'])->group(function () {
     Route::post('/pregister', [PregisterSchoolsController::class, 'postPregister']);

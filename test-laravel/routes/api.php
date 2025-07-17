@@ -17,5 +17,5 @@ require __DIR__ . '/api/privasi/personal-data.php';
 require __DIR__ . '/api/privasi/experience.php';
 require __DIR__ . '/api/privasi/education.php';
 require __DIR__ . '/api/privasi/pregister.php';
-require __DIR__ . '/api/privasi/student.php';
+//require __DIR__ . '/api/privasi/student.php';
 require __DIR__ . '/api/location/location.php';
